@@ -34,8 +34,15 @@ protected:
     void StartJump(const FInputActionValue& Value);
     void StopJump(const FInputActionValue& Value);
 
+    /** Glow Mesh **/
+    UPROPERTY()
+    class UMaterialInstanceDynamic* DynamicGlowMaterial;
+    int32 MaterialSlotIndex = 0;
+
 public:
     virtual void Tick(float DeltaTime) override;
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void UpdateGlow(float ChargePercent);
 };

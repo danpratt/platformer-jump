@@ -29,11 +29,40 @@ void AAPlatformerBaseCharacter::BeginPlay()
             }
         }
     }
+
+	// Create a dynamic material instance for the glow effect
+    // Get the mesh, get the material at slot 0, and make it dynamic
+    UMaterialInterface* CurrentMat = GetMesh()->GetMaterial(MaterialSlotIndex);
+    if (CurrentMat)
+    {
+        DynamicGlowMaterial = GetMesh()->CreateDynamicMaterialInstance(MaterialSlotIndex, CurrentMat);
+    }
 }
 
 void AAPlatformerBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (UUPlatformerMovementComponent* CustomMoveComp = Cast<UUPlatformerMovementComponent>(GetCharacterMovement()))
+    {
+        UpdateGlow(CustomMoveComp->CurrentJumpCharge);
+    }
+    
+}
+
+// Glow updates based on the charge percent from the movement component
+void AAPlatformerBaseCharacter::UpdateGlow(float ChargePercent)
+{
+    if (DynamicGlowMaterial)
+    {
+        // "GlowIntensity" must match the name of the Scalar Parameter in your Shader
+        float FinalIntensity = ChargePercent * 10.0f; // Multiplier for extra "pop"
+        DynamicGlowMaterial->SetScalarParameterValue(FName("GlowIntensity"), FinalIntensity);
+
+        // Optional: Change the color to a "Warning Red" as it gets full
+        FLinearColor GlowColor = FLinearColor::LerpUsingHSV(FLinearColor::Blue, FLinearColor::Red, ChargePercent);
+        DynamicGlowMaterial->SetVectorParameterValue(FName("GlowColor"), GlowColor);
+    }
 }
 
 // Binding the Jump input using the Enhanced Input System
